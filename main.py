@@ -1,5 +1,14 @@
 import sys
 import os
+from nltk import word_tokenize, pos_tag, ne_chunk
+from nltk.stem import WordNetLemmatizer
+from nltk.corpus import wordnet
+import spacy
+from spacy.tokens import Doc
+from spacy.matcher import Matcher 
+
+
+nlp = spacy.load("en_core_web_sm")
 
 # Dictionary of the file names with keywords
 keywords_dict = {
@@ -19,7 +28,18 @@ def load_keywords():
             keywords_data[word] = f.read().splitlines()
 
 def resume_score(file_content):
-    
+    matcher = Matcher(file_content.vocab)
+    sizes = {}
+
+    for key, value in keywords_data.items():
+        essay_type = [{"LEMMA": {"IN": value}}]
+        matcher.add(f"{key}", [[{"LEMMA": {"IN": essay_type}}]])
+
+    for matcher_id in matcher:
+        essay = matcher.get(matcher_id)
+        sizes[essay] = len(essay[1])
+
+    return max(sizes, key=sizes.get)
 
 def process_user_file(file):
     # Making sure the file exists and is a .txt file
@@ -34,6 +54,9 @@ def process_user_file(file):
         # Open and read the user's file
         with open(file, 'r') as f:
             content = f.read()
+            # Tokenizes, does segmentation, pos_tag,
+            # Lemmatization, dependency parsing, and NER
+            return nlp(content)
     
     except IOError as e:
         print(f"Sorry. Error reading {file}")
