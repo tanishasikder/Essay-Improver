@@ -33,7 +33,7 @@ def resume_score(file_content):
 
     for key, value in keywords_data.items():
         essay_type = [{"LEMMA": {"IN": value}}]
-        matcher.add(f"{key}", [[{"LEMMA": {"IN": essay_type}}]])
+        matcher.add(key, [[{"LEMMA": {"IN": essay_type}}]])
 
     for matcher_id in matcher:
         essay = matcher.get(matcher_id)
@@ -56,7 +56,15 @@ def process_user_file(file):
             content = f.read()
             # Tokenizes, does segmentation, pos_tag,
             # Lemmatization, dependency parsing, and NER
-            return nlp(content)
+            doc = nlp(content)
+
+            tokens = []
+            for token in doc:
+                # Checks if it is alphabetic or a stop word
+                if token.is_alpha and not token.is_stop:
+                    tokens.append(token.lemma_.lower())
+
+            return tokens
     
     except IOError as e:
         print(f"Sorry. Error reading {file}")
@@ -68,4 +76,5 @@ if __name__== "__main__":
         sys.exit(1)
 
     input_file = sys.argv[1]
-    process_user_file(input_file)
+    doc = process_user_file(input_file)
+    print(doc)
