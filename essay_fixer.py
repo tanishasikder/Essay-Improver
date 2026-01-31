@@ -1,8 +1,5 @@
 import sys
 import os
-from nltk import word_tokenize, pos_tag, ne_chunk
-from nltk.stem import WordNetLemmatizer
-from nltk.corpus import wordnet
 import spacy
 from spacy.tokens import Doc
 from spacy.matcher import Matcher 
@@ -52,6 +49,3 @@ def grammar_checker(file_content):
     checker = language_tool.check(words)
     corrected_content = language_tool.correct(words)
     return checker, corrected_content
-
-
-
