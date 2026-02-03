@@ -4,7 +4,7 @@ import spacy
 from spacy.tokens import Doc
 from spacy.matcher import Matcher 
 import language_tool_python
-
+import cohesion
 
 nlp = spacy.load("en_core_web_sm")
 language_tool = language_tool_python.LanguageTool('en-US')
@@ -43,9 +43,13 @@ def passive_voice_checker(file_content):
         passive_content = []
         if token.dep_ == "auxpass" or token.dep_ == "nsubjpass":
             passive_content.append(token.text)
+        return passive_content
 
 def grammar_checker(file_content):
     words = file_content.text
     checker = language_tool.check(words)
     corrected_content = language_tool.correct(words)
     return checker, corrected_content
+
+def create_corrections(file_content):
+    pass
