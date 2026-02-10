@@ -4,6 +4,11 @@ from langchain.chat_models import init_chat_model
 from langchain_openai import OpenAIEmbeddings
 from langchain_core.vectorstores import InMemoryVectorStore
 import essay_fixer
+
+# LangSmith to potentially debug the chain
+os.environ["LANGSMITH_TRACING"] = "true"
+os.environ["LANGSMITH_API_KEY"] = getpass.getpass()
+
 # Using OpenAI model to generate report
 os.environ["OPENAI_API_KEY"] = "..."
 model = init_chat_model("gpt-4.1")

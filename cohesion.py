@@ -12,38 +12,21 @@ model = "roberta-base"
 tokenizer = AutoTokenizer.from_pretrained(model)
 model = AutoModelForSequenceClassification.from_pretrained(model, num_labels=2)
 
-# CoLA dataset. Good for seeing if sentence makes sense
-cola_path = kagglehub.dataset_download("krazy47/cola-the-corpus-of-linguistic-acceptability")
-
-# wiki_sentence_order dataset. See if sentences are in right order
-wiki_dataset = load_dataset("Fraser/wiki_sentences", split='train', streaming=True)
-
-# Dataframes for the datasets
-wiki_df = wiki_dataset.to_pandas()
-cola_df = pd.read_csv(cola_path)
+# GLUE CoLA dataset
+cola = load_dataset("glue", "cola", split="train")
 
 # Tokenize the dataframes
 def tokenize_data(data):
-    return tokenizer(data['text'], padding="max_length", truncation=True)
+    return tokenizer(data['sentence'], padding="max_length", truncation=True)
 
-wiki_tokenized = wiki_df.map(tokenize_data, batched=True)
-cola_tokenized = cola_df.map(tokenize_data, batched=True)
+def make_train_test():
+    cola_split = cola['train'].train_test_split(test_size=0.2)
+    tokenize = cola_split.map(tokenize_data(cola_split), batched=True)
 
-# Train test split
-wiki_split = wiki_tokenized['train'].train_test_split(test_size=0.2)
-cola_split = cola_tokenized['train'].train_test_split(test_size=0.2)
+    train = tokenize['train']
+    test = tokenize['test']
 
-wiki_train = wiki_split['train']
-wiki_test = wiki_split['test']
-cola_train = cola_split['train']
-cola_test = cola_split['test']
-
-# DataLoaders to manage batches of data
-wiki_train_dataloader = DataLoader(wiki_train, shuffle=True, batch_size=10)
-wiki_test_dataloader = DataLoader(wiki_test, batch_size=10)
-
-cola_train_dataloader = DataLoader(cola_train, shuffle=True, batch_size=10)
-cola_test_dataloader = DataLoader(cola_test, batch_size=10)
+    return train, test
 
 # Arguments for training
 training_parameters = TrainingArguments(
@@ -56,23 +39,20 @@ training_parameters = TrainingArguments(
     weight_decay=0.01
 )
 
-# Training the models
-wiki_trainer = Trainer(
-    model=model,
-    args = training_parameters,
-    train_dataset=wiki_train,
-    eval_dataset=wiki_test
-)
+def make_final_data():
+    wiki_train, wiki_test = make_train_test()
 
-cola_trainer = Trainer(
-    model=model,
-    arsg=training_parameters,
-    train_dataset=cola_train,
-    eval_dataset=cola_test
-)
+    # Training the models
+    wiki_trainer = Trainer(
+        model=model,
+        args = training_parameters,
+        train_dataset=wiki_train,
+        eval_dataset=wiki_test
+    )
 
-wiki_trainer.train()
-cola_trainer.train()
+    wiki_trainer.train()
 
-print(f'wiki_trainer{wiki_trainer.evaluate()}')
-print(f'cola_trainer{cola_trainer.evaluate()}')
+    return wiki_trainer
+
+#print(f'wiki_trainer{wiki_trainer.evaluate()}')
+#print(f'cola_trainer{cola_trainer.evaluate()}')
