@@ -1,7 +1,12 @@
 import kagglehub
 import pandas as pd
 import torch
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
+from transformers import (
+    AutoModelForSequenceClassification, 
+    AutoTokenizer,
+    TrainingArguments,
+    Trainer,
+    DataCollatorWithPadding)
 from datasets import load_dataset
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
@@ -13,11 +18,16 @@ tokenizer = AutoTokenizer.from_pretrained(model)
 model = AutoModelForSequenceClassification.from_pretrained(model, num_labels=2)
 
 # GLUE CoLA dataset
-cola = load_dataset("glue", "cola", split="train")
+cola = load_dataset("glue", "cola")
 
 # Tokenize the dataframes
 def tokenize_data(data):
     return tokenizer(data['sentence'], padding="max_length", truncation=True)
+
+tokenized = cola.map(tokenize_data, batched=True)
+
+# Rename the label column. Required for HuggingFace
+tokenized_dataset = tokenized.rename_column("label", "labels")
 
 def make_train_test():
     cola_split = cola['train'].train_test_split(test_size=0.2)
