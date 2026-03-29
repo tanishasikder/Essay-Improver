@@ -1,0 +1,19 @@
+-user accounts stored in postgresql
+
+-learn from user feedback: track which suggestions users
+actually accept vs ignore
+
+-personalize individual writing styles rather than one size
+fits all 
+
+-check for redunancy, puncuation, tone, clarity, and engagement
+    rephrase words if theyre too wordy or confusing
+    analyze if writing sounds confident, polite, formal, etc
+    based on the intention
+    engagement enhances writing by suggesting better vocab
+
+-fine tuning small language models on domain specific writing
+so it knows what good likes like in that context
+
+-user profiling. different users have different needs
+

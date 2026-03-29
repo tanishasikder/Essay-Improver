@@ -24,19 +24,16 @@ cola = load_dataset("glue", "cola")
 def tokenize_data(data):
     return tokenizer(data['sentence'], padding="max_length", truncation=True)
 
-tokenized = cola.map(tokenize_data, batched=True)
-
 # Rename the label column. Required for HuggingFace
-tokenized_dataset = tokenized.rename_column("label", "labels")
+cola_dataset = cola.rename_column("label", "labels")
 
-def make_train_test():
-    cola_split = cola['train'].train_test_split(test_size=0.2)
-    tokenize = cola_split.map(tokenize_data(cola_split), batched=True)
+cola_train = cola_dataset["train"]
+cola_test = cola_dataset["test"]
 
-    train = tokenize['train']
-    test = tokenize['test']
-
-    return train, test
+# Fit into train set then map into train test sets
+tokenizer.fit(cola_train)
+tokenized_cola_train = cola_train.map(tokenize_data, batched=True)
+tokenized_cola_test = cola_test.map(tokenize_data, batched=True)
 
 # Arguments for training
 training_parameters = TrainingArguments(
@@ -49,20 +46,16 @@ training_parameters = TrainingArguments(
     weight_decay=0.01
 )
 
-def make_final_data():
-    wiki_train, wiki_test = make_train_test()
+# Training the models
+wiki_trainer = Trainer(
+    model=model,
+    args = training_parameters,
+    train_dataset=tokenized_cola_train,
+    eval_dataset=tokenized_cola_test
+)
 
-    # Training the models
-    wiki_trainer = Trainer(
-        model=model,
-        args = training_parameters,
-        train_dataset=wiki_train,
-        eval_dataset=wiki_test
-    )
+wiki_trainer.train()
 
-    wiki_trainer.train()
-
-    return wiki_trainer
 
 #print(f'wiki_trainer{wiki_trainer.evaluate()}')
 #print(f'cola_trainer{cola_trainer.evaluate()}')
