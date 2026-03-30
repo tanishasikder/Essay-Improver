@@ -2,7 +2,7 @@ import kagglehub
 import pandas as pd
 import torch
 from transformers import (
-    AutoModelForSequenceClassification, 
+    AutoModel, 
     AutoTokenizer,
     TrainingArguments,
     Trainer,
@@ -15,7 +15,7 @@ from transformers import Trainer, TrainingArguments
 # Importing model to be fine tuned
 model = "roberta-base"
 tokenizer = AutoTokenizer.from_pretrained(model)
-model = AutoModelForSequenceClassification.from_pretrained(model, num_labels=2)
+model = AutoModel.from_pretrained(model, num_labels=2)
 
 # GLUE CoLA dataset
 cola = load_dataset("glue", "cola")

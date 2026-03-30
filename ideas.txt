@@ -17,3 +17,16 @@ so it knows what good likes like in that context
 
 -user profiling. different users have different needs
 
+
+put a layer to extract the features and count how much is
+good vs how much is bad. present the user the good text
+saying they should continue this. the grammatical and english
+rules should be continued
+
+the bad stuff you put through the language tools and tell the
+user why its bad
+
+put the entire text into another model(s) that is trained on
+text from a specific domain to help a user know words that is
+better suited for that context
+
